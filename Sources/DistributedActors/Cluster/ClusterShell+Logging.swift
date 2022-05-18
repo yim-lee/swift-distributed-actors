@@ -72,7 +72,7 @@ extension ClusterShell {
         _ context: _ActorContext<ClusterShell.Message>, _ type: TraceLogType, message: Any,
         file: String = #file, function: String = #function, line: UInt = #line
     ) {
-        if let level = context.system.settings.cluster.traceLogLevel {
+        if let level = context.system.settings.traceLogLevel {
             context.log.log(
                 level: level,
                 "[tracelog:cluster] \(type.description): \(message)",

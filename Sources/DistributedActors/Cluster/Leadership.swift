@@ -313,14 +313,14 @@ public extension Leadership {
 // ==== ----------------------------------------------------------------------------------------------------------------
 // MARK: Leadership settings
 
-public extension ClusterSettings {
+public extension ClusterSystemSettings {
     enum LeadershipSelectionSettings {
         /// No automatic leader selection, you can write your own logic and issue a `Cluster.LeadershipChange` `Cluster.Event` to the `system.cluster.events` event stream.
         case none
         /// All nodes get ordered by their node addresses and the "lowest" is always selected as a leader.
         case lowestReachable(minNumberOfMembers: Int)
 
-        func make(_: ClusterSettings) -> LeaderElection? {
+        func make(_: ClusterSystemSettings) -> LeaderElection? {
             switch self {
             case .none:
                 return nil

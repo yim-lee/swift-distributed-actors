@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift Distributed Actors open source project
 //
-// Copyright (c) 2018-2019 Apple Inc. and the Swift Distributed Actors project authors
+// Copyright (c) 2018-2022 Apple Inc. and the Swift Distributed Actors project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -21,12 +21,12 @@ public enum DowningStrategySettings {
     case none
     case timeout(TimeoutBasedDowningStrategySettings)
 
-    func make(_ clusterSettings: ClusterSettings) -> DowningStrategy? {
+    func make(_ clusterSystemSettings: ClusterSystemSettings) -> DowningStrategy? {
         switch self {
         case .none:
             return nil
         case .timeout(let settings):
-            return TimeoutBasedDowningStrategy(settings, selfNode: clusterSettings.uniqueBindNode)
+            return TimeoutBasedDowningStrategy(settings, selfNode: clusterSystemSettings.uniqueBindNode)
         }
     }
 }

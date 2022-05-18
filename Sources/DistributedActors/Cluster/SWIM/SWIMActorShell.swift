@@ -95,7 +95,7 @@ internal struct SWIMActorShell {
         guard self.settings.initialContactPoints.isEmpty else {
             fatalError(
                 """
-                swim.initialContactPoints was not empty! Please use `settings.cluster discovery settings to discover peers,
+                swim.initialContactPoints was not empty! Please use `settings.discovery settings to discover peers,
                 rather than the internal swim instances configuration settings!
                 """)
         }

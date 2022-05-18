@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift Distributed Actors open source project
 //
-// Copyright (c) 2018-2019 Apple Inc. and the Swift Distributed Actors project authors
+// Copyright (c) 2018-2022 Apple Inc. and the Swift Distributed Actors project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -26,7 +26,7 @@ class ClusterDocExamples: XCTestCase {
     func example_receive_behavior() throws {
         // tag::joining[]
         let system = ActorSystem("ClusterJoining") { settings in
-            settings.cluster.enabled = true // <1>
+            settings.enabled = true // <1>
             // system will bind by default on `localhost:7337`
         }
 
@@ -54,7 +54,7 @@ class ClusterDocExamples: XCTestCase {
 
         // tag::discovery-joining-config[]
         let system = ActorSystem("DiscoveryJoining") { settings in
-            settings.cluster.discovery = ServiceDiscoverySettings(
+            settings.discovery = ServiceDiscoverySettings(
                 SomeSpecificServiceDiscovery( /* configuration */ ),
                 service: "my-service" // `Service` type aligned with what SomeSpecificServiceDiscovery expects
             )
@@ -84,7 +84,7 @@ class ClusterDocExamples: XCTestCase {
         }
         // tag::discovery-joining-config-2[]
         let system = ActorSystem("DiscoveryJoining") { settings in
-            settings.cluster.discovery = ServiceDiscoverySettings(
+            settings.discovery = ServiceDiscoverySettings(
                 SomeGenericServiceDiscovery( /* configuration */ ), // <1>
                 service: "my-service",
                 mapInstanceToNode: { (instance: SomeGenericServiceDiscovery.Instance) -> Node in // <2>

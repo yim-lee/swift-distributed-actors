@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift Distributed Actors open source project
 //
-// Copyright (c) 2018-2019 Apple Inc. and the Swift Distributed Actors project authors
+// Copyright (c) 2018-2022 Apple Inc. and the Swift Distributed Actors project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -22,14 +22,14 @@ class ClusteringDocExamples: XCTestCase {
         // tag::config_tls[]
         let system = ActorSystem("TestSystem") { settings in
             // ...
-            settings.cluster.tls = TLSConfiguration.makeServerConfiguration( // <1>
+            settings.tls = TLSConfiguration.makeServerConfiguration( // <1>
                 certificateChain: try! NIOSSLCertificate.fromPEMFile("/path/to/certificate.pem").map { NIOSSLCertificateSource.certificate($0) }, // <2>
                 privateKey: .file("/path/to/private-key.pem") // , // <3>
 //                certificateVerification: .fullVerification, // <4>
 //                trustRoots: .file("/path/to/certificateChain.pem")
             ) // <5>
-            settings.cluster.tls?.certificateVerification = .fullVerification
-            settings.cluster.tls?.trustRoots = .file("/path/to/certificateChain.pem")
+            settings.tls?.certificateVerification = .fullVerification
+            settings.tls?.trustRoots = .file("/path/to/certificateChain.pem")
         }
         // end::config_tls[]
 
@@ -40,7 +40,7 @@ class ClusteringDocExamples: XCTestCase {
         // tag::config_tls_passphrase[]
         let system = ActorSystem("TestSystem") { settings in
             // ...
-            settings.cluster.tlsPassphraseCallback = { setter in
+            settings.tlsPassphraseCallback = { setter in
                 setter([UInt8]("password".utf8))
             }
         }

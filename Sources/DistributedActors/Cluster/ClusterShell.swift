@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift Distributed Actors open source project
 //
-// Copyright (c) 2018-2019 Apple Inc. and the Swift Distributed Actors project authors
+// Copyright (c) 2018-2022 Apple Inc. and the Swift Distributed Actors project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -125,7 +125,7 @@ internal class ClusterShell {
             // tombstone the association in the shell immediately.
             // No more message sends to the system will be possible.
             traceLog_Remote(system.cluster.uniqueNode, "Finish terminate association [\(remoteNode)]: Stored tombstone")
-            self._associationTombstones[remoteNode] = Association.Tombstone(remoteNode, settings: system.settings.cluster)
+            self._associationTombstones[remoteNode] = Association.Tombstone(remoteNode, settings: system.settings)
             return self._associations.removeValue(forKey: remoteNode)
         }
 
@@ -366,32 +366,32 @@ internal class ClusterShell {
 // MARK: Cluster Bootstrap / Binding
 
 extension ClusterShell {
-    /// Binds on setup to the configured address (as configured in `system.settings.cluster`).
+    /// Binds on setup to the configured address (as configured in `system.settings`).
     ///
     /// Once bound proceeds to `ready` state, where it remains to accept or initiate new handshakes.
     private func bind() -> _Behavior<Message> {
         return .setup { context in
-            let clusterSettings = context.system.settings.cluster
-            let uniqueBindAddress = clusterSettings.uniqueBindNode
+            let settings = context.system.settings
+            let uniqueBindAddress = settings.uniqueBindNode
 
             // 1) failure detector:
-            let swimBehavior = SWIMActorShell.behavior(settings: clusterSettings.swim, clusterRef: context.myself)
+            let swimBehavior = SWIMActorShell.behavior(settings: settings.swim, clusterRef: context.myself)
             self._swimRef = try context._spawn(SWIMActorShell.naming, props: SWIMActorShell.props, swimBehavior)
 
             // 2) discovering of new members:
-            if let discoverySettings = clusterSettings.discovery {
+            if let discoverySettings = settings.discovery {
                 _ = try context._spawn(DiscoveryShell.naming, DiscoveryShell(settings: discoverySettings, cluster: context.myself).behavior)
             }
 
             // 3) leader election, so it may move members: .joining -> .up (and other `LeaderAction`s)
-            if let leaderElection = context.system.settings.cluster.autoLeaderElection.make(context.system.cluster.settings) {
+            if let leaderElection = context.system.settings.autoLeaderElection.make(settings) {
                 let leadershipShell = Leadership.Shell(leaderElection)
                 let leadership = try context._spawn(Leadership.Shell.naming, leadershipShell.behavior)
                 context.watch(leadership) // if leadership fails for some reason, we are in trouble and need to know about it
             }
 
             // 4) downing strategy (automatic downing)
-            if let downing = clusterSettings.downingStrategy.make(context.system.cluster.settings) {
+            if let downing = settings.downingStrategy.make(settings) {
                 let shell = DowningStrategyShell(downing)
                 try context._spawn(shell.naming, shell.behavior)
             }
@@ -402,20 +402,20 @@ extension ClusterShell {
                 system: context.system,
                 shell: context.myself,
                 bindAddress: uniqueBindAddress,
-                settings: clusterSettings,
+                settings: settings,
                 serializationPool: self.serializationPool
             )
 
-            return context.awaitResultThrowing(of: chanElf, timeout: clusterSettings.bindTimeout) { (chan: Channel) in
+            return context.awaitResultThrowing(of: chanElf, timeout: settings.bindTimeout) { (chan: Channel) in
                 context.log.info("Bound to \(chan.localAddress.map(\.description) ?? "<no-local-address>")")
 
                 let gossiperControl: GossiperControl<Cluster.MembershipGossip, Cluster.MembershipGossip> = try Gossiper._spawn(
                     context,
                     name: "\(ActorPath._clusterGossip.name)",
                     settings: .init(
-                        interval: clusterSettings.membershipGossipInterval,
-                        intervalRandomFactor: clusterSettings.membershipGossipIntervalRandomFactor,
-                        style: .acknowledged(timeout: clusterSettings.membershipGossipInterval),
+                        interval: settings.membershipGossipInterval,
+                        intervalRandomFactor: settings.membershipGossipIntervalRandomFactor,
+                        style: .acknowledged(timeout: settings.membershipGossipInterval),
                         peerDiscovery: .onClusterMember(atLeast: .joining, resolve: { member in
                             let resolveContext = ResolveContext<GossipShell<Cluster.MembershipGossip, Cluster.MembershipGossip>.Message>(address: ._clusterGossip(on: member.uniqueNode), system: context.system)
                             return context.system._resolve(context: resolveContext).asAddressable
@@ -433,7 +433,7 @@ extension ClusterShell {
                 )
 
                 var state = ClusterShellState(
-                    settings: clusterSettings,
+                    settings: settings,
                     channel: chan,
                     events: self.clusterEvents,
                     gossiperControl: gossiperControl,
@@ -1172,7 +1172,7 @@ private extension ClusterShell {
         }
 
         let addrDesc = "\(state.settings.uniqueBindNode.node.host):\(state.settings.uniqueBindNode.node.port)"
-        return context.awaitResult(of: state.channel.close(), timeout: context.system.settings.cluster.unbindTimeout) {
+        return context.awaitResult(of: state.channel.close(), timeout: context.system.settings.unbindTimeout) {
             // FIXME: also close all associations (!!!)
             switch $0 {
             case .success:
@@ -1250,7 +1250,7 @@ extension ClusterShell {
             )
 
             do {
-                let onDownAction = context.system.settings.cluster.onDownAction.make()
+                let onDownAction = context.system.settings.onDownAction.make()
                 try onDownAction(context.system) // TODO: return a future and run with a timeout
             } catch {
                 context.system.log.error("Failed to executed onDownAction! Shutting down system forcefully! Error: \(error)")

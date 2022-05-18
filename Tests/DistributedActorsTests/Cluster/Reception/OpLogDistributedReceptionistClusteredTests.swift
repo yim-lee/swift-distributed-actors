@@ -76,8 +76,8 @@ final class OpLogDistributedReceptionistClusteredTests: ClusteredActorSystemsXCT
     }
 
     override func configureActorSystem(settings: inout ClusterSystemSettings) {
-        settings.cluster.receptionist.implementation = .opLogSync
-        settings.cluster.receptionist.ackPullReplicationIntervalSlow = .milliseconds(300)
+        settings.receptionist.implementation = .opLogSync
+        settings.receptionist.ackPullReplicationIntervalSlow = .milliseconds(300)
 
         settings.serialization.register(StringForwarder.Message.self)
     }
@@ -151,7 +151,7 @@ final class OpLogDistributedReceptionistClusteredTests: ClusteredActorSystemsXCT
 
             // Join the nodes
             local.cluster.join(node: remote.cluster.uniqueNode.node)
-            try assertAssociated(local, withExactly: remote.settings.cluster.uniqueBindNode)
+            try assertAssociated(local, withExactly: remote.settings.uniqueBindNode)
 
             // The remote node discovers the actor
             try await Task {
@@ -207,7 +207,7 @@ final class OpLogDistributedReceptionistClusteredTests: ClusteredActorSystemsXCT
 //        _ = try remoteLookupProbe.expectMessage()
 //
 //        local.cluster.join(node: remote.cluster.uniqueNode.node)
-//        try assertAssociated(local, withExactly: remote.settings.cluster.uniqueBindNode)
+//        try assertAssociated(local, withExactly: remote.settings.uniqueBindNode)
 //
 //        let localListing = try localLookupProbe.expectMessage()
 //        localListing.refs.count.shouldEqual(4)
@@ -247,7 +247,7 @@ final class OpLogDistributedReceptionistClusteredTests: ClusteredActorSystemsXCT
 //        _ = try remoteLookupProbe.expectMessage()
 //
 //        first.cluster.join(node: second.cluster.uniqueNode.node)
-//        try assertAssociated(first, withExactly: second.settings.cluster.uniqueBindNode)
+//        try assertAssociated(first, withExactly: second.settings.uniqueBindNode)
 //
 //        try remoteLookupProbe.eventuallyExpectListing(expected: [refA, refB], within: .seconds(3))
 //
@@ -275,7 +275,7 @@ final class OpLogDistributedReceptionistClusteredTests: ClusteredActorSystemsXCT
 //            $0.cluster.receptionist.ackPullReplicationIntervalSlow = .milliseconds(200)
 //        }
 //        first.cluster.join(node: second.cluster.uniqueNode.node)
-//        try assertAssociated(first, withExactly: second.settings.cluster.uniqueBindNode)
+//        try assertAssociated(first, withExactly: second.settings.uniqueBindNode)
 //
 //        let firstKey = Reception.Key(_ActorRef<String>.self, id: "first")
 //        let extraKey = Reception.Key(_ActorRef<String>.self, id: "extra")
@@ -318,7 +318,7 @@ final class OpLogDistributedReceptionistClusteredTests: ClusteredActorSystemsXCT
 //            $0.cluster.receptionist.ackPullReplicationIntervalSlow = .milliseconds(200)
 //        }
 //        first.cluster.join(node: second.cluster.uniqueNode.node)
-//        try assertAssociated(first, withExactly: second.settings.cluster.uniqueBindNode)
+//        try assertAssociated(first, withExactly: second.settings.uniqueBindNode)
 //
 //        let key = Reception.Key(_ActorRef<String>.self, id: "key")
 //
@@ -350,7 +350,7 @@ final class OpLogDistributedReceptionistClusteredTests: ClusteredActorSystemsXCT
 //            $0.cluster.receptionist.ackPullReplicationIntervalSlow = .milliseconds(200)
 //        }
 //        first.cluster.join(node: second.cluster.uniqueNode.node)
-//        try assertAssociated(first, withExactly: second.settings.cluster.uniqueBindNode)
+//        try assertAssociated(first, withExactly: second.settings.uniqueBindNode)
 //
 //        let key = Reception.Key(_ActorRef<String>.self, id: "key")
 //
@@ -390,12 +390,12 @@ final class OpLogDistributedReceptionistClusteredTests: ClusteredActorSystemsXCT
 //            $0.cluster.receptionist.ackPullReplicationIntervalSlow = .milliseconds(200)
 //        }
 //        first.cluster.join(node: second.cluster.uniqueNode.node)
-//        try assertAssociated(first, withExactly: second.settings.cluster.uniqueBindNode)
+//        try assertAssociated(first, withExactly: second.settings.uniqueBindNode)
 //
 //        let key = Reception.Key(_ActorRef<String>.self, id: "first")
 //
 //        var allRefs: Set<_ActorRef<String>> = []
-//        for i in 1 ... (first.settings.cluster.receptionist.syncBatchSize * 10) {
+//        for i in 1 ... (first.settings.receptionist.syncBatchSize * 10) {
 //            let ref = try first._spawn("example-\(i)", self.stopOnMessage)
 //            first._receptionist.register(ref, with: key)
 //            _ = allRefs.insert(ref)

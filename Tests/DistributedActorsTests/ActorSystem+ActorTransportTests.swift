@@ -21,7 +21,7 @@ final class ActorSystemTransportTests: ActorSystemXCTestCase, @unchecked Sendabl
     func test_system_shouldAssignIdentityAndReadyActor() async throws {
         try runAsyncAndBlock {
             let first = await setUpNode("first") { settings in
-                settings.cluster.disable()
+                settings.disable()
             }
 
             var stub: StubDistributedActor? = StubDistributedActor(actorSystem: first)

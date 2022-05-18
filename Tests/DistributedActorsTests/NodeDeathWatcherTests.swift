@@ -20,10 +20,10 @@ import XCTest
 final class NodeDeathWatcherTests: ClusteredActorSystemsXCTestCase {
     func test_nodeDeath_shouldFailAllRefsOnSpecificAddress() async throws {
         let first = await setUpNode("first") { settings in
-            settings.cluster.swim.probeInterval = .milliseconds(100)
+            settings.swim.probeInterval = .milliseconds(100)
         }
         let second = await setUpNode("second") { settings in
-            settings.cluster.swim.probeInterval = .milliseconds(100)
+            settings.swim.probeInterval = .milliseconds(100)
         }
 
         try self.joinNodes(node: first, with: second)

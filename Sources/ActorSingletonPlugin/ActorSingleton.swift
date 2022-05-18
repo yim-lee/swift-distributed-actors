@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift Distributed Actors open source project
 //
-// Copyright (c) 2019 Apple Inc. and the Swift Distributed Actors project authors
+// Copyright (c) 2019-2022 Apple Inc. and the Swift Distributed Actors project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -46,7 +46,7 @@ internal final class ActorSingleton<Message: ActorMessage> {
 
     /// Spawns `ActorSingletonProxy` and associated actors (e.g., `ActorSingletonManager`).
     func startAll(_ system: ActorSystem) throws {
-        let allocationStrategy = self.settings.allocationStrategy.make(system.settings.cluster, self.settings)
+        let allocationStrategy = self.settings.allocationStrategy.make(system.settings, self.settings)
         try self.proxyLock.withLock {
             self._proxy = try system._spawnSystemActor(
                 "singletonProxy-\(self.settings.name)",
@@ -127,7 +127,7 @@ public enum AllocationStrategySettings {
     /// Singletons will run on the cluster leader. *All* nodes are potential candidates.
     case byLeadership
 
-    func make(_: ClusterSettings, _: ActorSingletonSettings) -> ActorSingletonAllocationStrategy {
+    func make(_: ClusterSystemSettings, _: ActorSingletonSettings) -> ActorSingletonAllocationStrategy {
         switch self {
         case .byLeadership:
             return ActorSingletonAllocationByLeadership()
