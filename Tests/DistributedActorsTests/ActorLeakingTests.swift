@@ -250,6 +250,9 @@ final class ActorLeakingTests: ActorSystemXCTestCase {
         return self.skipLeakTests()
         #else
         var system: ClusterSystem? = await ClusterSystem("FreeMe") // only "reference from user land" to the system
+        defer {
+            try! system?.shutdown().wait()
+        }
 
         let p = self.testKit.makeTestProbe(expecting: String.self)
 
