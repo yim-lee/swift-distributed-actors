@@ -19,9 +19,7 @@ import XCTest
 
 final class RemoteActorRefProviderTests: ActorSystemXCTestCase {
     override func setUp() async throws {
-        _ = await self.setUpNode(String(reflecting: Self.self)) { settings in
-            settings.enabled = true
-        }
+        _ = await self.setUpNode(String(reflecting: Self.self))
     }
 
     let localNode = UniqueNode(systemName: "RemoteAssociationTests", host: "127.0.0.1", port: 7111, nid: UniqueNodeID(777_777))
